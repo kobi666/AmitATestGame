@@ -7,7 +7,7 @@ public class ObjectManipulator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        var v = "asd";
     }
 
     // Update is called once per frame
