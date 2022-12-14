@@ -9,24 +9,95 @@ using Unity.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class ObjectManipulator : MonoBehaviour
+public abstract class ObjectManipulator : MonoBehaviour
 {
     public MeshRenderer MeshRenderer;
 
+    private static string objectName = "Object_";
+    
+
+    public Rigidbody Rigidbody;
+
+    public abstract ActionSet ActionSet { get; }
+
+    public bool ActionsRandomized = false;
+    public Dictionary<ActionTypes, ActionContainer> GetObjectActions()
+    {
+        if (ActionSet == ActionSet.A)
+        {
+            return ObjectActionsSet_A;
+        }
+
+        return ObjectActionsSet_B;
+    }
+        
+
+    private bool IsMenuOrderShuffled = false;
+    //public bool ActionSet
+
+
+    private bool mFallingEnabled = false;
+    public bool FallingEnabled
+    {
+        get => mFallingEnabled;
+        set
+        {
+            mFallingEnabled = value;
+            if (value)
+            {
+                Rigidbody.useGravity = true;
+                Rigidbody.constraints = RigidbodyConstraints.None;
+            }
+        }
+    }
+    
+    
+    // assuming that constraints are predetermined in the game object inside unity
+    async Task EnableFalling(CancellationToken token)
+    {
+        if (!FallingEnabled)
+        {
+            FallingEnabled = true;
+        }
+    }
+
+    public float DegreesToRotate = 90f;
+
+    async Task RotateOnYAxis(CancellationToken token)
+    {
+        float counter = 0f;
+        var currentYRotation = transform.rotation;
+        var TargetRotation = currentYRotation * Quaternion.Euler(new Vector3(0, DegreesToRotate,0));
+        
+        while (!token.IsCancellationRequested && counter <= GeneralLerpTime)
+        {
+            counter += Time.deltaTime;
+            transform.rotation = Quaternion.Slerp(currentYRotation, TargetRotation, counter / GeneralLerpTime);
+            await Task.Yield();
+        }
+    }
+    
+    
    
     public float ObjectScaleBase;
 
-    public Dictionary<ActionTypes, (Func<Task>, CancellationTokenSource)>  ObjectActions = new();
+    public Dictionary<ActionTypes, ActionContainer>  ObjectActionsSet_A = new();
+    public Dictionary<ActionTypes, ActionContainer>  ObjectActionsSet_B = new();
 
-
+    
+    [Button]
     public async void CallAction(ActionTypes actionType)
     {
-        var _action = ObjectActions[actionType];
-        _action.Item2?.Cancel();
-        _action.Item2?.Dispose();
-        _action.Item2 = new CancellationTokenSource();
-        await Task.Yield();
-        await _action.Item1.Invoke();
+        if (ObjectActionsSet_A.ContainsKey(actionType))
+        {
+            var _action = ObjectActionsSet_A[actionType];
+            _action.cts?.Cancel();
+            _action.cts?.Dispose();
+            await Task.Yield();
+            _action.cts = new CancellationTokenSource();
+            var token = _action.cts.Token;
+            await _action.ActionTask.Invoke(token);
+        }
     }
 
 
@@ -38,20 +109,23 @@ public class ObjectManipulator : MonoBehaviour
 
     
     [Button]
-    public async Task CloneObject()
+    public async Task CloneObject(CancellationToken token)
     {
         var targetPosition = GetAvailablePositionAbove(transform.position, transform.localScale.x);
         ObjectManipulator newObject = GameObject.Instantiate(this, targetPosition, Quaternion.identity);
+        newObject.name = $"{objectName}+{GameManager.instance.ObjectCounter++}";
+        // waiting 2 frames for object to finish Start Method in order to maintain base object scale factor
+        await Task.Delay(2);
         newObject.ObjectScaleBase = ObjectScaleBase;
     }
 
-    public float GeneralLerpTime = 2f;
+    public float GeneralLerpTime = 1.5f;
     
     [Button]
-    public async Task ChangeColor()
+    public async Task ChangeColor(CancellationToken token)
     {
         var targetColor = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
-        var token = ObjectActions[ActionTypes.ChangeColor].Item2.Token;
+        //var token = ObjectActions[ActionTypes.ChangeColor].Item2.Token;
         float counter = 0f;
         var currentColor = MyColor;
         while (!token.IsCancellationRequested && counter <= GeneralLerpTime)
@@ -62,19 +136,46 @@ public class ObjectManipulator : MonoBehaviour
     }
 
 
-    public async Task ScaleObject()
+    public async Task EnlargeObject(CancellationToken token)
+    {
+        //var token = ObjectActions[ActionTypes.Enlarge].Item2.Token;
+        float counter = 0f;
+        var currentScale = transform.localScale.x;
+        var targetScale = currentScale + ObjectScaleBase * 0.1f;
+        while (!token.IsCancellationRequested && counter <= GeneralLerpTime)
+        {
+            counter += Time.deltaTime;
+            transform.localScale = Vector3.Lerp(Vector3.one * currentScale, Vector3.one * targetScale,
+                counter / GeneralLerpTime);
+            
+            await Task.Yield();
+        }
+    }
+
+    async Task SwitchMenuActions(CancellationToken token)
+    {
+        GameManager.instance.MenuSwitched = !GameManager.instance.MenuSwitched;
+    }
+
+    async Task RandomizeActions(CancellationToken token)
     {
         
     }
 
 
     // Start is called before the first frame update
-    void Start()
+    public void Start()
     {
+        GameManager.instance.AllObjects.Add(name, this);
         ObjectScaleBase = transform.localScale.x;
+        ObjectActionsSet_A.Add(ActionTypes.Clone, new ActionContainer(CloneObject, "Clone") );
+        ObjectActionsSet_A.Add(ActionTypes.ChangeColor, new ActionContainer(ChangeColor, "Change Color"));
+        ObjectActionsSet_A.Add(ActionTypes.Enlarge, new ActionContainer(EnlargeObject, "Enlarge"));
+        ObjectActionsSet_A.Add(ActionTypes.Fall, new ActionContainer(EnableFalling, "Fall"));
         
-        ObjectActions.Add(ActionTypes.Clone, (CloneObject, null) );
-        ObjectActions.Add(ActionTypes.ChangeColor, (ChangeColor, null));
+        ObjectActionsSet_B.Add(ActionTypes.Rotate, new ActionContainer(RotateOnYAxis, "Rotate"));
+        ObjectActionsSet_B.Add(ActionTypes.Switch, new ActionContainer(SwitchMenuActions, "Switch"));
+        ObjectActionsSet_B.Add(ActionTypes.Randomize, new ActionContainer(RandomizeActions, "Randomize"));
     }
     /// <summary>
     /// Assuming that scale XYZ is synchronyzed, provides position above current object available for cloning
@@ -92,25 +193,10 @@ public class ObjectManipulator : MonoBehaviour
 
     public float MinimumVerticalSpaceBetweenObjects;
 
-    // [Button]
-    // public void CheckIfSpaceAboveMeIsAvailable()
-    // {
-    //     Debug.LogWarning($"Space above is available : {CheckIfSpaceIsAvailable(transform.position, transform.localScale.x)}");
-    // }
-
-    // Vector3 GetPositionForCloning()
-    // {
-    //     return GetAvailablePositionAbove(transform.position, transform.localScale.x);
-    // }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }
 
-
+[Serializable]
 public enum ActionTypes
 {
     Enlarge,
@@ -120,4 +206,18 @@ public enum ActionTypes
     ChangeColor,
     Rotate,
     Switch
+}
+
+
+public class ActionContainer
+{
+    public CancellationTokenSource cts;
+    public Func<CancellationToken, Task> ActionTask;
+    public String ActionDescription;
+
+    public ActionContainer(Func<CancellationToken,Task> actionTask, String actionDescription)
+    {
+        ActionTask = actionTask;
+        ActionDescription = actionDescription;
+    }
 }

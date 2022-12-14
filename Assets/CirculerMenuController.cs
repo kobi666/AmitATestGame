@@ -1,15 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using MyExtensions;
 using UnityEngine;
 
-public class SpaceChecker : MonoBehaviour
+public class CirculerMenuController : MonoBehaviour
 {
-    public float MinimumVerticalSpaceBetweenObjects = 1.5f;
-    
-    
-    
+
+    public RectTransform RectTransform;
     // Start is called before the first frame update
     void Start()
     {

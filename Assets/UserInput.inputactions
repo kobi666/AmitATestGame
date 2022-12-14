@@ -1,0 +1,46 @@
+{
+    "name": "UserInput",
+    "maps": [
+        {
+            "name": "MouseActions",
+            "id": "fd8a9962-b8ac-4004-86d4-95c71da58d0b",
+            "actions": [
+                {
+                    "name": "LeftButtonClicked",
+                    "type": "Button",
+                    "id": "14a94e6e-a0cb-47e9-a6e3-7a20df9327e9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "9e957cad-b497-4e31-872f-a0708283eb39",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "New control scheme",
+                    "action": "LeftButtonClicked",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "New control scheme",
+            "bindingGroup": "New control scheme",
+            "devices": [
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
