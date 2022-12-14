@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MyExtensions;
 using Sirenix.OdinInspector;
 using Unity.Collections;
 using UnityEngine;
@@ -13,7 +14,25 @@ public abstract class ObjectManipulator : MonoBehaviour
 {
     public MeshRenderer MeshRenderer;
 
+    
+
     private static string objectName = "Object_";
+
+    [Button]
+    void RandomizeA()
+    {
+        actionA_randomized.Shuffle();
+    }
+
+    public int[] actionA_randomized = new[]
+    {
+        0,1,2,3
+    };
+    
+    public int[] actionB_randomized = new[]
+    {
+        0, 1, 2
+    };
     
 
     public Rigidbody Rigidbody;
@@ -83,14 +102,16 @@ public abstract class ObjectManipulator : MonoBehaviour
 
     public Dictionary<ActionTypes, ActionContainer>  ObjectActionsSet_A = new();
     public Dictionary<ActionTypes, ActionContainer>  ObjectActionsSet_B = new();
-
     
+
+
     [Button]
     public async void CallAction(ActionTypes actionType)
     {
-        if (ObjectActionsSet_A.ContainsKey(actionType))
+        var actions = ActionSet == ActionSet.A ? ObjectActionsSet_A : ObjectActionsSet_B;
+        if (actions.ContainsKey(actionType))
         {
-            var _action = ObjectActionsSet_A[actionType];
+            var _action = actions[actionType];
             _action.cts?.Cancel();
             _action.cts?.Dispose();
             await Task.Yield();
@@ -130,6 +151,7 @@ public abstract class ObjectManipulator : MonoBehaviour
         var currentColor = MyColor;
         while (!token.IsCancellationRequested && counter <= GeneralLerpTime)
         {
+            counter += Time.deltaTime;
             MyColor = Color.Lerp(currentColor, targetColor, counter / GeneralLerpTime);
             await Task.Yield();
         }
@@ -155,16 +177,20 @@ public abstract class ObjectManipulator : MonoBehaviour
     async Task SwitchMenuActions(CancellationToken token)
     {
         GameManager.instance.MenuSwitched = !GameManager.instance.MenuSwitched;
+        MenuController.instance.TryOpeningObjectActionMenu();
     }
 
     async Task RandomizeActions(CancellationToken token)
     {
-        
+        ActionsRandomized = true;
+        actionA_randomized.Shuffle();
+        actionB_randomized.Shuffle();
+        MenuController.instance.TryOpeningObjectActionMenu();
     }
 
 
     // Start is called before the first frame update
-    public void Start()
+    protected void Start()
     {
         GameManager.instance.AllObjects.Add(name, this);
         ObjectScaleBase = transform.localScale.x;
@@ -221,3 +247,5 @@ public class ActionContainer
         ActionDescription = actionDescription;
     }
 }
+
+

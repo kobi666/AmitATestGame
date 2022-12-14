@@ -153,6 +153,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentObject: {fileID: 0}
+  ActionSet_A_parentObject: {fileID: 904177595}
+  ActionSet_B_parentObject: {fileID: 404697034}
   CirculerMenuController: {fileID: 1635991899}
   ActionsToSprites:
   - ActionType: 0
@@ -180,6 +182,8 @@ MonoBehaviour:
   - {fileID: 1328279404}
   MenuState: 0
   TrackedMousePosition: {x: 0, y: 0, z: 0}
+  MenuPopupTime: 0.8
+  MenuCloseTime: 0.2
 --- !u!4 &70204107
 Transform:
   m_ObjectHideFlags: 0
@@ -644,6 +648,7 @@ GameObject:
   - component: {fileID: 627309181}
   - component: {fileID: 627309180}
   - component: {fileID: 627309184}
+  - component: {fileID: 627309185}
   m_Layer: 3
   m_Name: Sphere
   m_TagString: Untagged
@@ -658,7 +663,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 627309179}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: acb0153b9d490da4bac0ebda57129c81, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -684,7 +689,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f377fe37b765e35498120fb1f895e598, type: 2}
+  - {fileID: 1442508428}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -741,13 +746,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f7788652ce332142b5da2a28f426434, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MeshRenderer: {fileID: 0}
-  Rigidbody: {fileID: 0}
+  MeshRenderer: {fileID: 627309181}
+  actionA_randomized: 00000000010000000200000003000000
+  actionB_randomized: 000000000100000002000000
+  Rigidbody: {fileID: 627309185}
   ActionsRandomized: 0
   DegreesToRotate: 90
   ObjectScaleBase: 0
-  GeneralLerpTime: 2
-  MinimumVerticalSpaceBetweenObjects: 0
+  GeneralLerpTime: 1.2
+  MinimumVerticalSpaceBetweenObjects: 2
+--- !u!54 &627309185
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 627309179}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 94
+  m_CollisionDetection: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -970,12 +993,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MeshRenderer: {fileID: 716723309}
+  actionA_randomized: 00000000010000000200000003000000
+  actionB_randomized: 000000000100000002000000
   Rigidbody: {fileID: 716723313}
   ActionsRandomized: 0
   DegreesToRotate: 90
   ObjectScaleBase: 0
-  GeneralLerpTime: 2
-  MinimumVerticalSpaceBetweenObjects: 0
+  GeneralLerpTime: 1.2
+  MinimumVerticalSpaceBetweenObjects: 2
 --- !u!1 &835656012
 GameObject:
   m_ObjectHideFlags: 0
@@ -1848,6 +1873,84 @@ Material:
     - _Color: {r: 0.80859995, g: 1, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
+--- !u!21 &1442508428
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SphereMaterial (Instance) (Instance) (Instance) (Instance)
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BumpScale: 1
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _GlossMapScale: 1
+    - _Glossiness: 0.5
+    - _GlossyReflections: 1
+    - _Metallic: 0
+    - _Mode: 0
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _UVSec: 0
+    - _ZWrite: 1
+    m_Colors:
+    - _Color: {r: 1, g: 0, b: 0.8291087, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []
 --- !u!1 &1605388356
 GameObject:
   m_ObjectHideFlags: 0
@@ -1905,6 +2008,7 @@ GameObject:
   - component: {fileID: 1635991898}
   - component: {fileID: 1635991897}
   - component: {fileID: 1635991899}
+  - component: {fileID: 1635991900}
   m_Layer: 5
   m_Name: CirculerMenu
   m_TagString: Untagged
@@ -1921,8 +2025,8 @@ RectTransform:
   m_GameObject: {fileID: 1635991895}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 904177596}
   - {fileID: 404697035}
@@ -1931,7 +2035,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 259.81, y: 148.65}
+  m_AnchoredPosition: {x: 259.97, y: 148.65}
   m_SizeDelta: {x: 600, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1635991897
@@ -1985,6 +2089,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RectTransform: {fileID: 1635991896}
+  EventTrigger: {fileID: 0}
+  PointerInsideMenu: 0
+--- !u!114 &1635991900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1635991895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1635991899}
+          m_TargetAssemblyTypeName: CirculerMenuController, Assembly-CSharp
+          m_MethodName: SetPointerState
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 1
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1635991899}
+          m_TargetAssemblyTypeName: CirculerMenuController, Assembly-CSharp
+          m_MethodName: SetPointerState
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1735526098
 GameObject:
   m_ObjectHideFlags: 0
