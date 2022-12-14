@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Sirenix.OdinInspector;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class MenuController : MonoBehaviour
@@ -168,7 +166,7 @@ public class MenuController : MonoBehaviour
 
    private RaycastHit RaycastHit;
    
-   [Button]
+   
    public ObjectManipulator GetRaycastedObject()
    {
       Ray ray = camera.ScreenPointToRay(TrackedMousePosition);
@@ -176,7 +174,7 @@ public class MenuController : MonoBehaviour
       
       if (RaycastHit.collider != null)
       {
-         Debug.DrawLine(camera.transform.position, RaycastHit.collider.transform.position, Color.blue, 5f);
+         
          try
          {
             var obj = GameManager.instance.AllObjects[RaycastHit.collider.name] ?? null;
@@ -189,6 +187,15 @@ public class MenuController : MonoBehaviour
       }
       return null;
    }
+
+   public async void TryToOpenMenuAtDelay()
+   {
+      await Task.Delay(TimeSpan.FromSeconds(MenuCloseTime + 0.1f));
+      if (MenuState == MenuState.Closed)
+      {
+         TryOpeningObjectActionMenu();
+      }
+   }
    
    
 
@@ -198,12 +205,13 @@ public class MenuController : MonoBehaviour
       {
          cts?.Cancel();
          cts?.Dispose();
-         cts = null;
+         
          await Task.Yield();
          cts = new CancellationTokenSource();
          if (MenuState == MenuState.Open)
          {
             await CloseCirculerMenuSequence(cts.Token);
+            cts = new CancellationTokenSource();
          }
          SetMenuActions();
          await OpenCircularMenuSequence(cts.Token);
@@ -215,7 +223,7 @@ public class MenuController : MonoBehaviour
    {
       cts?.Cancel();
       cts?.Dispose();
-      cts = null;
+      
       await Task.Yield();
       cts = new CancellationTokenSource();
       await CloseCirculerMenuSequence(cts.Token);
@@ -242,7 +250,7 @@ public class MenuController : MonoBehaviour
 
    public void OnMouseClick()
    {
-      //Debug.LogWarning(camera.ScreenToWorldPoint(TrackedMousePosition));
+      
       
       if (MenuState == MenuState.Open)
       {

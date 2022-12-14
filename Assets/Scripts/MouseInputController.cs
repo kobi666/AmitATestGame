@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,11 +13,8 @@ public class MouseInputController : MonoBehaviour
     
 
 
-    [Button]
-    public void OnMouseClick()
-    {
-        
-    }
+    
+  
     
     
     // Start is called before the first frame update
@@ -27,9 +24,6 @@ public class MouseInputController : MonoBehaviour
         if (UserInput == null)
         {
             UserInput = new UserInput();
-            // Tell the "gameplay" action map that we want to get told about
-            // when actions get triggered.
-            
         }
         UserInput.MouseActions.Enable();
         UserInput.MouseActions.LeftButtonClicked.performed += ctx => MenuController.OnMouseClick();

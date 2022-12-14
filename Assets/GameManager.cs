@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
+
 using UnityEngine;
 
 
@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
     }
     public int ObjectCounter = 0;
     
-    [ShowInInspector]
+    
     public Dictionary<String, ObjectManipulator> AllObjects = new();
 
     public static GameManager instance;

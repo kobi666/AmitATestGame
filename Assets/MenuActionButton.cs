@@ -13,7 +13,6 @@ public class MenuActionButton : MonoBehaviour
 
     public void RunObjectAction()
     {
-        Debug.LogWarning("Pressed");
         if (ActionType != null)
         {
             MenuController.instance.CurrentObject?.CallAction(ActionType);

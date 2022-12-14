@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MyExtensions;
-using Sirenix.OdinInspector;
+
 using Unity.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -18,7 +18,7 @@ public abstract class ObjectManipulator : MonoBehaviour
 
     private static string objectName = "Object_";
 
-    [Button]
+    
     void RandomizeA()
     {
         actionA_randomized.Shuffle();
@@ -96,16 +96,9 @@ public abstract class ObjectManipulator : MonoBehaviour
         }
     }
     
-    
-   
-    public float ObjectScaleBase;
-
     public Dictionary<ActionTypes, ActionContainer>  ObjectActionsSet_A = new();
     public Dictionary<ActionTypes, ActionContainer>  ObjectActionsSet_B = new();
     
-
-
-    [Button]
     public async void CallAction(ActionTypes actionType)
     {
         var actions = ActionSet == ActionSet.A ? ObjectActionsSet_A : ObjectActionsSet_B;
@@ -129,7 +122,7 @@ public abstract class ObjectManipulator : MonoBehaviour
     }
 
     
-    [Button]
+    
     public async Task CloneObject(CancellationToken token)
     {
         var targetPosition = GetAvailablePositionAbove(transform.position, transform.localScale.x);
@@ -137,12 +130,14 @@ public abstract class ObjectManipulator : MonoBehaviour
         newObject.name = $"{objectName}+{GameManager.instance.ObjectCounter++}";
         // waiting 2 frames for object to finish Start Method in order to maintain base object scale factor
         await Task.Delay(2);
-        newObject.ObjectScaleBase = ObjectScaleBase;
+        
+        // changing the color once to force new instance of material for the instantiated object
+        newObject.MeshRenderer.material.color = newObject.MeshRenderer.material.color;
     }
 
     public float GeneralLerpTime = 1.5f;
     
-    [Button]
+    
     public async Task ChangeColor(CancellationToken token)
     {
         var targetColor = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
@@ -163,7 +158,7 @@ public abstract class ObjectManipulator : MonoBehaviour
         //var token = ObjectActions[ActionTypes.Enlarge].Item2.Token;
         float counter = 0f;
         var currentScale = transform.localScale.x;
-        var targetScale = currentScale + ObjectScaleBase * 0.1f;
+        var targetScale = currentScale  * 1.1f;
         while (!token.IsCancellationRequested && counter <= GeneralLerpTime)
         {
             counter += Time.deltaTime;
@@ -177,7 +172,7 @@ public abstract class ObjectManipulator : MonoBehaviour
     async Task SwitchMenuActions(CancellationToken token)
     {
         GameManager.instance.MenuSwitched = !GameManager.instance.MenuSwitched;
-        MenuController.instance.TryOpeningObjectActionMenu();
+        MenuController.instance.TryToOpenMenuAtDelay();
     }
 
     async Task RandomizeActions(CancellationToken token)
@@ -185,7 +180,7 @@ public abstract class ObjectManipulator : MonoBehaviour
         ActionsRandomized = true;
         actionA_randomized.Shuffle();
         actionB_randomized.Shuffle();
-        MenuController.instance.TryOpeningObjectActionMenu();
+        MenuController.instance.TryToOpenMenuAtDelay();
     }
 
 
@@ -193,7 +188,7 @@ public abstract class ObjectManipulator : MonoBehaviour
     protected void Start()
     {
         GameManager.instance.AllObjects.Add(name, this);
-        ObjectScaleBase = transform.localScale.x;
+        
         ObjectActionsSet_A.Add(ActionTypes.Clone, new ActionContainer(CloneObject, "Clone") );
         ObjectActionsSet_A.Add(ActionTypes.ChangeColor, new ActionContainer(ChangeColor, "Change Color"));
         ObjectActionsSet_A.Add(ActionTypes.Enlarge, new ActionContainer(EnlargeObject, "Enlarge"));
