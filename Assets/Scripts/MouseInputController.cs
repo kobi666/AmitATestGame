@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,13 +10,6 @@ public class MouseInputController : MonoBehaviour
     private UserInput UserInput;
     public MenuController MenuController;
     
-
-
-    
-  
-    
-    
-    // Start is called before the first frame update
     void Start()
     {
         Mouse = Mouse.current;
@@ -27,10 +19,6 @@ public class MouseInputController : MonoBehaviour
         }
         UserInput.MouseActions.Enable();
         UserInput.MouseActions.LeftButtonClicked.performed += ctx => MenuController.OnMouseClick();
-        
-        
-        
-        
     }
 
     private Vector3 trackedMousePosition;

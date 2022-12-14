@@ -12,13 +12,8 @@ using Random = UnityEngine.Random;
 
 public abstract class ObjectManipulator : MonoBehaviour
 {
+    
     public MeshRenderer MeshRenderer;
-
-    
-
-    private static string objectName = "Object_";
-
-    
     void RandomizeA()
     {
         actionA_randomized.Shuffle();
@@ -51,8 +46,8 @@ public abstract class ObjectManipulator : MonoBehaviour
     }
         
 
-    private bool IsMenuOrderShuffled = false;
-    //public bool ActionSet
+    
+    
 
 
     private bool mFallingEnabled = false;
@@ -70,8 +65,11 @@ public abstract class ObjectManipulator : MonoBehaviour
         }
     }
     
-    
-    // assuming that constraints are predetermined in the game object inside unity
+    /// <summary>
+    /// Assuming that constraints are predetermined in the game object inside unity, enables Gravity and removes
+    /// rigidbody constraints
+    /// </summary>
+    /// <param name="token"></param>
     async Task EnableFalling(CancellationToken token)
     {
         if (!FallingEnabled)
@@ -99,6 +97,11 @@ public abstract class ObjectManipulator : MonoBehaviour
     public Dictionary<ActionTypes, ActionContainer>  ObjectActionsSet_A = new();
     public Dictionary<ActionTypes, ActionContainer>  ObjectActionsSet_B = new();
     
+    
+    /// <summary>
+    /// Used to call an Object action externally, according to action type
+    /// </summary>
+    /// <param name="actionType"></param>
     public async void CallAction(ActionTypes actionType)
     {
         var actions = ActionSet == ActionSet.A ? ObjectActionsSet_A : ObjectActionsSet_B;
@@ -122,7 +125,7 @@ public abstract class ObjectManipulator : MonoBehaviour
     }
 
     
-    
+    private static string objectName = "Object_";
     public async Task CloneObject(CancellationToken token)
     {
         var targetPosition = GetAvailablePositionAbove(transform.position, transform.localScale.x);
@@ -229,7 +232,9 @@ public enum ActionTypes
     Switch
 }
 
-
+/// <summary>
+/// Contains each object's action sequences to later be stored in its action set dictionary
+/// </summary>
 public class ActionContainer
 {
     public CancellationTokenSource cts;

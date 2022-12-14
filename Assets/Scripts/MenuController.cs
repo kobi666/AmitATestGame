@@ -9,20 +9,21 @@ using UnityEngine;
 public class MenuController : MonoBehaviour
 {
    public ObjectManipulator CurrentObject;
-   private int ObjectsMask;
-   private int UIMask;
+   private int ObjectsLayerMask;
+   
 
    public static MenuController instance;
    
    
-
+   public MenuState MenuState = MenuState.Closed;
+   private Camera camera;
+   public Vector3 TrackedMousePosition;
+   private CancellationTokenSource cts;
+   public float MenuPopupTime = 0.8f;
    public GameObject ActionSet_A_parentObject;
    public GameObject ActionSet_B_parentObject;
-
    public CirculerMenuController CirculerMenuController;
-
    public List<ActionToSprite> ActionsToSprites = new();
-
    public List<MenuActionButton> ActionSet_A_buttons = new();
    public List<MenuActionButton> ActionSet_B_buttons = new();
 
@@ -82,8 +83,14 @@ public class MenuController : MonoBehaviour
       }
    }
     
-   
-   
+   private void Start()
+   {
+      instance = this;
+      camera = Camera.main;
+      CirculerMenuController.onPointerExit += () => CloseCircularMenu();
+      ObjectsLayerMask = LayerMask.GetMask("Objects");
+   }
+   // sets Menu actions according to what is defined per Object
    public void SetMenuActions()
    {
       bool actionSet_A_or_B = CurrentObject.ActionSet == ActionSet.A;
@@ -103,33 +110,14 @@ public class MenuController : MonoBehaviour
       
    }
 
-   private void Start()
-   {
-      instance = this;
-      camera = Camera.main;
-      CirculerMenuController.onPointerExit += () => CloseCircularMenu();
-      ObjectsMask = LayerMask.GetMask("Objects");
-      UIMask = LayerMask.GetMask("UI");
-   }
-
-   public MenuState MenuState = MenuState.Closed;
-   private Camera camera;
-
-   public Vector3 TrackedMousePosition;
-   
    
 
-   public void UpdateMenuActions()
-   {
-      if (CurrentObject != null)
-      {
-         SetMenuActions();
-      }
-   }
-
-   private CancellationTokenSource cts;
-
-   public float MenuPopupTime = 0.8f;
+   
+   
+   /// <summary>
+   /// async sequence for opening the Object menu
+   /// </summary>
+   /// <param name="token"></param>
    async Task OpenCircularMenuSequence(CancellationToken token)
    {
       CirculerMenuController.RectTransform.localScale = Vector3.zero;
@@ -149,6 +137,11 @@ public class MenuController : MonoBehaviour
    }
 
    public float MenuCloseTime = 0.2f;
+   
+   /// <summary>
+   /// async sequence for closing the object menu
+   /// </summary>
+   /// <param name="token"></param>
    async Task CloseCirculerMenuSequence(CancellationToken token)
    {
       float currentScale = CirculerMenuController.RectTransform.localScale.x;
@@ -165,16 +158,17 @@ public class MenuController : MonoBehaviour
    }
 
    private RaycastHit RaycastHit;
-   
-   
-   public ObjectManipulator GetRaycastedObject()
+   /// <summary>
+   /// Tries to find an object from the GameManager using a raycast
+   /// </summary>
+   /// <returns></returns>
+   public ObjectManipulator TryGetClickedObject()
    {
       Ray ray = camera.ScreenPointToRay(TrackedMousePosition);
-      Physics.Raycast(ray, out RaycastHit, 100f, ObjectsMask);
+      Physics.Raycast(ray, out RaycastHit, 100f, ObjectsLayerMask);
       
       if (RaycastHit.collider != null)
       {
-         
          try
          {
             var obj = GameManager.instance.AllObjects[RaycastHit.collider.name] ?? null;
@@ -187,7 +181,11 @@ public class MenuController : MonoBehaviour
       }
       return null;
    }
-
+   
+   
+   /// <summary>
+   /// trys to open the object menu at delay, for added appearance of menu related effects
+   /// </summary>
    public async void TryToOpenMenuAtDelay()
    {
       await Task.Delay(TimeSpan.FromSeconds(MenuCloseTime + 0.1f));
@@ -198,7 +196,9 @@ public class MenuController : MonoBehaviour
    }
    
    
-
+   /// <summary>
+   /// The function trys to open the object menu provided that in the meantime another object was not set or nullified
+   /// </summary>
    public async void TryOpeningObjectActionMenu()
    {
       if (CurrentObject != null)
@@ -219,6 +219,10 @@ public class MenuController : MonoBehaviour
       }
    }
    
+   
+   /// <summary>
+   /// used to start the close menu sequence without re-opening it
+   /// </summary>
    public async void CloseCircularMenu()
    {
       cts?.Cancel();
@@ -232,40 +236,30 @@ public class MenuController : MonoBehaviour
 
 
 
-   bool CheckIfMouseIsInsideMenuArea()
-   {
-      var mousePosition = (Vector2)camera.ScreenToWorldPoint(TrackedMousePosition);
-      if (CirculerMenuController.RectTransform.rect.Contains(mousePosition))
-      {
-         return true;
-      }
-
-      return false;
-   }
-
-   private bool MouseInsideMenuArea = false;
-
+   
 
    
 
+
+   
+   /// <summary>
+   /// subscribed to user actions, and only triggered if the mouse pointer is outside of an open menu area
+   /// </summary>
    public void OnMouseClick()
    {
-      
-      
       if (MenuState == MenuState.Open)
       {
          if (!CirculerMenuController.PointerInsideMenu)
          {
-            CurrentObject = GetRaycastedObject();
+            CurrentObject = TryGetClickedObject();
             TryOpeningObjectActionMenu();
          } 
       }
       else
       {
-         CurrentObject = GetRaycastedObject();
+         CurrentObject = TryGetClickedObject();
          TryOpeningObjectActionMenu();
       }
-
    }
    
    

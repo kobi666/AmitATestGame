@@ -8,25 +8,13 @@ using UnityEngine;
 [DefaultExecutionOrder(-2000)]
 public class GameManager : MonoBehaviour
 {
-
-    public MenuController MenuController;
-
-    private bool mMenuSwitched = false;
-
-    public event Action onMenuUpdate;
-
-    public bool MenuSwitched
-    {
-        get => mMenuSwitched;
-        set
-        {
-            mMenuSwitched = value;
-            onMenuUpdate?.Invoke();
-        }
-    }
+    public bool MenuSwitched = false;
+    
     public int ObjectCounter = 0;
     
-    
+    /// <summary>
+    /// used to store each Object in order to avoid using "GetComponent"
+    /// </summary>
     public Dictionary<String, ObjectManipulator> AllObjects = new();
 
     public static GameManager instance;
@@ -34,8 +22,6 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         instance = this;
-        // initilize menu swap state on start
-        MenuSwitched = false;
     }
     
     
